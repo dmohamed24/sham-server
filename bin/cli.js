@@ -1,12 +1,8 @@
 #!/usr/bin/env node
-import fs from "node:fs";
-import path from "node:path";
-import { Command } from "commander";
-import app from "../src/server.js";
 
-// console.log(import.meta.dirname);
-// console.log(import.meta.filename);
-// console.log(path.dirname("../"));
+import { Command } from "commander";
+import { readConfigFile } from "../utility/readConfigFile.js";
+import createServer from "../src/server.js";
 
 const program = new Command();
 
@@ -17,25 +13,15 @@ program
   )
   .version("1.0.0");
 
-const readFile = (filePath) => {
-  try {
-    const rawJson = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(rawJson);
-  } catch (error) {
-    console.error(`Failed to read config: ${error.message}`);
-    process.exit(1);
-  }
-};
-
 program
   .command("mock")
   .argument("<filePath>", "config file path")
   .description("Start a mock API server from a config file")
   .option("-p, --port <port>", "override port value in the config")
   .action((filePath, options) => {
-    const data = readFile(filePath);
+    const data = readConfigFile(filePath);
     const port = options.port || data.port || 3000;
-
+    const app = createServer(data);
     app.listen(port, () => {
       console.log(`Server is running at http://localhost:${port}`);
     });

@@ -1,11 +1,15 @@
 import express from "express";
 
-const app = express();
-const port = 3000;
+const createServer = (config) => {
+  const app = express();
 
-// Define a basic route
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+  console.log(config);
 
-export default app;
+  app.get("/", (req, res) => {
+    res.send("Hello World!");
+  });
+
+  return app;
+};
+
+export default createServer;
