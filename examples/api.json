@@ -1,0 +1,62 @@
+{
+  "port": 5000,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/users",
+      "status": 200,
+      "delay": 500,
+      "response": {
+        "users": [
+          { "id": 1, "name": "Alice" },
+          { "id": 2, "name": "Bob" }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/users",
+      "status": 201,
+      "response": {
+        "message": "User created successfully"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/users/:id",
+      "status": 200,
+      "response": {
+        "id": 1,
+        "name": "Alice",
+        "email": "alice@example.com"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/login",
+      "status": 200,
+      "match": {
+        "body": { "username": "admin" },
+        "headers": { "content-type": "application/json" }
+      },
+      "response": {
+        "body": { "message": "Welcome back", "token": "abc123" },
+        "headers": {
+          "Set-Cookie": "session=abc123; HttpOnly",
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/profile",
+      "status": 200,
+      "match": {
+        "cookies": { "session": "abc123" }
+      },
+      "response": {
+        "body": { "user": "admin", "email": "admin@example.com" }
+      }
+    }
+  ]
+}
