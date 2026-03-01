@@ -1,5 +1,4 @@
 import express from "express";
-import { arrIsSame } from "../utility/arrIsSame.js";
 
 const createServer = (config) => {
   const app = express();
@@ -8,30 +7,54 @@ const createServer = (config) => {
 
   const routesArr = config.routes;
 
-  routesArr.forEach(({ method, path, status, delay, response, match }) => {
-    app[method.toLowerCase()](path, (req, res) => {
-      try {
-        if (method == "POST") {
-          if (!req.body.length) {
-            return res.status(500).json({ message: "Server error" });
-          }
+  routesArr.forEach(
+    ({ method, path, status, delay, response, match, simulateError }) => {
+      app[method.toLowerCase()](path, (req, res) => {
+        try {
+          const needsValidation = ["POST", "PUT", "PATCH"].includes(
+            method.toUpperCase(),
+          );
 
-          if (!arrIsSame(Object.keys(match.body), Object.keys(req.body))) {
+          if (simulateError && req.query.simulatedError === true) {
             return res
-              .status(400)
-              .json({ message: "The schema doesn't match" });
+              .status(simulateError.status)
+              .json(simulateError.response);
           }
-        }
 
-        setTimeout(() => {
-          return res.status(status).json(response);
-        }, delay);
-      } catch (error) {
-        console.error(`[sham-server error] ${error.message}`);
-        res.status(500).json({ message: "[sham-server] Internal tool error" });
-      }
-    });
-  });
+          if (needsValidation) {
+            if (!req.body) {
+              console.log(!req.body, "expected");
+              return res.status(422).json({
+                message: "Validation error",
+                missing: Object.keys(match.body),
+              });
+            }
+
+            const requiredKeys = Object.keys(match.body);
+            const missingKeys = requiredKeys.filter(
+              (key) => !(key in req.body),
+            );
+
+            if (missingKeys.length > 0) {
+              return res.status(422).json({
+                message: "Validation error",
+                missing: missingKeys,
+              });
+            }
+          }
+
+          setTimeout(() => {
+            return res.status(status).json(response);
+          }, delay);
+        } catch (error) {
+          console.error(`[sham-server error] ${error.message}`);
+          res
+            .status(500)
+            .json({ message: "[sham-server] Internal tool error" });
+        }
+      });
+    },
+  );
 
   return app;
 };
