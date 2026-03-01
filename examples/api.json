@@ -17,6 +17,9 @@
       "method": "POST",
       "path": "/users",
       "status": 201,
+      "match": {
+        "body": { "email": "alice@example.com", "name": "Alice" }
+      },
       "response": {
         "message": "User created successfully"
       }
@@ -29,33 +32,6 @@
         "id": 1,
         "name": "Alice",
         "email": "alice@example.com"
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/login",
-      "status": 200,
-      "match": {
-        "body": { "username": "admin" },
-        "headers": { "content-type": "application/json" }
-      },
-      "response": {
-        "body": { "message": "Welcome back", "token": "abc123" },
-        "headers": {
-          "Set-Cookie": "session=abc123; HttpOnly",
-          "Content-Type": "application/json"
-        }
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/profile",
-      "status": 200,
-      "match": {
-        "cookies": { "session": "abc123" }
-      },
-      "response": {
-        "body": { "user": "admin", "email": "admin@example.com" }
       }
     }
   ]
